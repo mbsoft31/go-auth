@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log"
 	_ "modernc.org/sqlite"
-	"os"
 )
 
 type Store struct {
@@ -42,12 +41,33 @@ func (s *Store) initializeTables() error {
 
 	// If the users table doesn't exist, initialize the database schema
 	if tableName == "" {
-		bytes, err := os.ReadFile("./migrations/initial_schema.sql")
-		if err != nil {
-			log.Fatalf("Failed to read migrations: %v", err)
-			return err
-		}
-		_, err = s.DB.Exec(string(bytes))
+		bytes := `CREATE TABLE IF NOT EXISTS users
+(
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    username   TEXT NOT NULL UNIQUE,
+    password   TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sessions
+(
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER,
+    token      TEXT NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE TABLE IF NOT EXISTS password_resets
+(
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER,
+    token      TEXT NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
+`
+		_, err = s.DB.Exec(bytes)
 		if err != nil {
 			log.Fatalf("Failed to create tables: %v", err)
 			return err
