@@ -10,17 +10,17 @@ func AuthMiddleware(store *Store) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			cookie, err := c.Cookie(store.config.CookieName)
 			if err != nil {
-				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
+				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized", "message": err.Error()})
 			}
 
 			sessionToken := cookie.Value
 			session, err := store.GetSessionByToken(sessionToken)
 			if err != nil {
-				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
+				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized", "message": err.Error()})
 			}
 			user, err := store.GetUserByID(session.UserID)
 			if err != nil {
-				return err
+				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized", "message": err.Error()})
 			}
 			c.Set("user", user)
 			return next(c)
