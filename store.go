@@ -131,6 +131,16 @@ func (s *Store) GetSessionByToken(token string) (*Session, error) {
 	return session, nil
 }
 
+func (s *Store) GetSessionByID(id int64) (*Session, error) {
+	session := &Session{}
+	row := s.DB.QueryRow("SELECT id, user_id, token, created_at FROM sessions WHERE id = ?", id)
+	err := row.Scan(&session.ID, &session.UserID, &session.Token, &session.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return session, nil
+}
+
 func (s *Store) DeleteSessionByToken(token string) error {
 	stmt, err := s.DB.Prepare("DELETE FROM sessions WHERE token = ?")
 	if err != nil {
