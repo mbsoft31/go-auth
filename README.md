@@ -4,6 +4,10 @@
 
 This package provides a simple and reusable authentication system for Go web applications. It uses SQLite to store user information and sessions, similar to Laravel's auth system. The package supports registration, login, password reset, and session management functionalities.
 
+### DOCUMENTATION
+
+refer to the docs here [Docs](./docs/index.md)
+
 ### Features
 
 - User registration and login
